@@ -3,18 +3,47 @@ project(RaylibTests)
 
 set(CMAKE_CXX_STANDARD 26)
 
-include(FetchContent)
+# raylib
+find_package(raylib QUIET)
+if (NOT raylib_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+            raylib
+            GIT_REPOSITORY https://github.com/raysan5/raylib.git
+            GIT_TAG 6.0
+            GIT_SHALLOW 1
+    )
+    FetchContent_MakeAvailable(raylib)
+endif()
 
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+# raylib-cpp
+find_package(raylib_cpp QUIET)
+if (NOT raylib_cpp_FOUND)
+    if (NOT DEFINED RAYLIB_CPP_VERSION)
+        set(RAYLIB_CPP_VERSION v6.0.0)
+    endif()
+    include(FetchContent)
+    FetchContent_Declare(
+            raylib_cpp
+            GIT_REPOSITORY https://github.com/RobLoach/raylib-cpp.git
+            GIT_TAG ${RAYLIB_CPP_VERSION}
+    )
+    FetchContent_MakeAvailable(raylib_cpp)
+endif()
 
-FetchContent_Declare(
-        raylib
-        GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 6.0
-)
+# This is the main part:
+set(SOURCES src/main.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib PRIVATE raylib_cpp)
 
-FetchContent_MakeAvailable(raylib)
+# Web Configurations
+if ("${PLATFORM}" STREQUAL "Web")
+    # Tell Emscripten to build an example.html file.
+    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+    # Required linker flags for using Raylib with Emscripten
+    target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
+endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
+# That's it! You should have an example executable that you can run. Have fun!
