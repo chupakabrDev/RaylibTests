@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 4.2)
-project(RaylibTests)
+project(RaylibTests LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# raylib
+# --- raylib ---
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
     include(FetchContent)
@@ -16,12 +18,10 @@ if (NOT raylib_FOUND)
     FetchContent_MakeAvailable(raylib)
 endif()
 
-# raylib-cpp
+# --- raylib-cpp ---
 find_package(raylib_cpp QUIET)
 if (NOT raylib_cpp_FOUND)
-    if (NOT DEFINED RAYLIB_CPP_VERSION)
-        set(RAYLIB_CPP_VERSION v6.0.0)
-    endif()
+    set(RAYLIB_CPP_VERSION v6.0.0)
     include(FetchContent)
     FetchContent_Declare(
             raylib_cpp
@@ -31,19 +31,11 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
-# This is the main part:
-set(SOURCES src/main.cpp)
-add_executable(${PROJECT_NAME} ${SOURCES})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib PRIVATE raylib_cpp)
+# --- main target ---
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+        src/InputMap.cpp
+)
 
-# Web Configurations
-if ("${PLATFORM}" STREQUAL "Web")
-    # Tell Emscripten to build an example.html file.
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-
-    # Required linker flags for using Raylib with Emscripten
-    target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
-endif()
-
-# That's it! You should have an example executable that you can run. Have fun!
+target_include_directories(${PROJECT_NAME} PRIVATE src include)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp)
