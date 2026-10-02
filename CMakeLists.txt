@@ -31,11 +31,25 @@ if (NOT raylib_cpp_FOUND)
     FetchContent_MakeAvailable(raylib_cpp)
 endif()
 
+# --- nlohmann_json ---
+find_package(nlohmann_json QUIET)
+if (NOT nlohmann_json_FOUND)
+    set(NLOHMANN_JSON_VERSION v3.12.0)
+    include(FetchContent)
+    FetchContent_Declare(
+            nlohmann_json
+            GIT_REPOSITORY https://github.com/nlohmann/json.git
+            GIT_TAG ${NLOHMANN_JSON_VERSION}
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
+
 # --- main target ---
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/InputMap.cpp
+        src/helper/TextHelper.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src include)
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp nlohmann_json)
