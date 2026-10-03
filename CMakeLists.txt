@@ -49,6 +49,12 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         src/InputMap.cpp
         src/helper/TextHelper.cpp
+        src/helper/TextureHelper.cpp
+)
+
+target_compile_definitions(RaylibTests PRIVATE
+        $<$<CONFIG:Debug>:ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/">
+        $<$<CONFIG:Release>:ASSETS_PATH="./assets/">
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src include)

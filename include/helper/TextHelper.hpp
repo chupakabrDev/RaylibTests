@@ -4,13 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-namespace text {
-    namespace window {
-        inline constexpr std::string_view TITLE = "title";
-    }
-    namespace test {
-
-    }
+namespace text::window {
+    inline constexpr std::string_view TITLE = "window.title";
 }
 
 class Localization {
@@ -18,6 +13,6 @@ class Localization {
 public:
     bool load(const std::string& lang);
 
-    std::string get(std::string &k) const;
+    [[nodiscard]] std::string get(std::string_view key) const;
 };
 

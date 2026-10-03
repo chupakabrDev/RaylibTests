@@ -1,13 +1,15 @@
-#include "TextHelper.hpp"
+#include "../../include/helper/TextHelper.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
 
 using nlohmann::json;
+namespace fs = std::filesystem;
 
 bool Localization::load(const std::string& lang) {
-    std::ifstream stream("assets/text" + lang + ".json");
+    fs::path path = fs::path(ASSETS_PATH) / "text" / (lang + ".json");
+    std::ifstream stream(path);
 
     if (!stream) {
         std::cerr << "Couldn't open the lang file for " + lang << std::endl;
@@ -25,7 +27,8 @@ bool Localization::load(const std::string& lang) {
     return true;
 }
 
-std::string Localization::get(std::string &key) const {
-    return data.contains(key) ? data.at(key).get<std::string>() : key;
+std::string Localization::get(std::string_view key) const {
+    const std::string k(key);
+    return data.contains(k) ? data.at(k).get<std::string>() : k;
 }
 
