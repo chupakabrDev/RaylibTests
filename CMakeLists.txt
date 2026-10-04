@@ -44,6 +44,27 @@ if (NOT nlohmann_json_FOUND)
     FetchContent_MakeAvailable(nlohmann_json)
 endif()
 
+# --- raygui ---
+set(RAYGUI_DIR "${CMAKE_BINARY_DIR}/raygui")
+set(RAYGUI_HEADER "${RAYGUI_DIR}/raygui.h")
+
+if (NOT EXISTS "${RAYGUI_HEADER}")
+    file(MAKE_DIRECTORY "${RAYGUI_DIR}")
+
+    file(DOWNLOAD
+            "https://raw.githubusercontent.com/raysan5/raygui/5.0/src/raygui.h"
+            "${RAYGUI_HEADER}"
+            SHOW_PROGRESS
+    )
+endif()
+
+add_library(raygui INTERFACE)
+
+target_include_directories(raygui INTERFACE
+        "${RAYGUI_DIR}"
+)
+
+
 # --- main target ---
 add_executable(${PROJECT_NAME}
         src/main.cpp
@@ -52,10 +73,19 @@ add_executable(${PROJECT_NAME}
         src/helper/TextureHelper.cpp
 )
 
-target_compile_definitions(RaylibTests PRIVATE
+target_compile_definitions(${PROJECT_NAME} PRIVATE
         $<$<CONFIG:Debug>:ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/">
         $<$<CONFIG:Release>:ASSETS_PATH="./assets/">
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE src include)
-target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp nlohmann_json)
+target_include_directories(${PROJECT_NAME} PRIVATE
+        src
+        include
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        raylib
+        raylib_cpp
+        nlohmann_json
+        raygui
+)
